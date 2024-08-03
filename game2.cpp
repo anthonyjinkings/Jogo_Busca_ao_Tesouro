@@ -4,17 +4,12 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <conio.h>
-#include <locale>
-#include <codecvt>
-#include <windows.h>
 #define ANSI_COLOR_CYN      "\e[0;36m" //cores em ANSI utilizadas 
 #define ANSI_COLOR_RED     "\e[0;31m"
-
 
 using namespace std;
 
 int main() {
-    system("chcp 65001");
     int num_jog, perso1, perso2, perso3, perso4, nume_jog=1, escolha;
     string perso5[5];
     string nome_jog1, nome_jog2, nome_jog3, nome_jog4, emoji[]={"🐻", "😽", "🧙‍♂", "🦸‍♂"};
@@ -38,7 +33,7 @@ int main() {
             cout << "Personagem do jogador " << i+1 << endl;
             cin >> escolha;
             while (escolha < 1 || escolha > 4) {
-                cout << "Escolha inválida. Tente novamente entre 1 e 4." << endl;
+                cout << "Escolha inválida. Tente novamente entre 2 e 4." << endl;
                 cin >> escolha;
             }
             escolhas[i]= escolha;
@@ -58,7 +53,7 @@ int main() {
         }
         for (l=0; l<6; l++) {
             for (c=0; c<6; c++) {
-                cout << setw(5) << matriz[l][c];
+                cout << setw(3) << matriz[l][c];
             }
             cout << endl;
         }
