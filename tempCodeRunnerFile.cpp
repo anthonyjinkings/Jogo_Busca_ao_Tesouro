@@ -32,7 +32,7 @@ void exibirranking(const int pontuacao[], const string nomes[], int num_jog) {
     }
 }
 
-void radardediamante(string matriz[6][6], const string matriz_oculta[6][6], int linha, int coluna) {
+void drone(string matriz[6][6], const string matriz_oculta[6][6], int linha, int coluna) {
     for (int l = max(0, linha - 1); l <= min(6 - 1, linha + 1); l++) {
         for (int c = max(0, coluna - 1); c <= min(6 - 1, coluna + 1); c++) {
             matriz[l][c] = matriz_oculta[l][c];
@@ -40,7 +40,7 @@ void radardediamante(string matriz[6][6], const string matriz_oculta[6][6], int 
     }
 }
 
-void visaogeral(string matriz[6][6], const string matriz_oculta[6][6], int linha, int coluna, int& pontos) {
+void radardemina(string matriz[6][6], const string matriz_oculta[6][6], int linha, int coluna, int& pontos) {
     bool encontroudinamite = false;
     for (int l = max(0, linha - 1); l <= min(6 - 1, linha + 1); l++) {
         for (int c = max(0, coluna - 1); c <= min(6 - 1, coluna + 1); c++) {
@@ -187,7 +187,7 @@ int main() {
             int linha, coluna;
             cin >> linha >> coluna;
             if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-                radardediamante(matriz, matriz_oculta, linha, coluna);
+                drone(matriz, matriz_oculta, linha, coluna);
             } else {
                 cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
                 continue;
@@ -197,7 +197,7 @@ int main() {
             int linha, coluna;
             cin >> linha >> coluna;
             if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-                visaogeral(matriz, matriz_oculta, linha, coluna, pontuacao[jogadoratual]);
+                radademina(matriz, matriz_oculta, linha, coluna, pontuacao[jogadoratual]);
             } else {
                 cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
                 continue;
