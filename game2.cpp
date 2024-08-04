@@ -15,13 +15,13 @@
 using namespace std;
 
 void imprimirmatriz(const string matriz[6][6]) {
-    cout << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
+    cout << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
     for (int l = 0; l < 6; l++) {
         cout << ANSI_COLOR_CYN << "| " << ANSI_COLOR_RESET;
         for (int c = 0; c < 6; c++) {
             cout << setw(3) << matriz[l][c] << ANSI_COLOR_CYN << " | " << ANSI_COLOR_RESET;
         }
-        cout << endl << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
+        cout << endl << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
     }
 }
 
