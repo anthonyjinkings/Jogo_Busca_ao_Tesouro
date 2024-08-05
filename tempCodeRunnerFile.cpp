@@ -92,6 +92,8 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
 
 int main() {
     system("chcp 65001 > nul");
+    //string command = "mode con: cols=30 lines=30";
+    //system(command.c_str());
     int escolhas[4]; // pra armazenar os personagem escolhidos
     int i;
     float armadilhas = 0.10;
