@@ -60,6 +60,36 @@ void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool mat
     }
 }
 
+void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna) {
+    bool encontrou_armadilha = false;
+    bool encontrou_dica = false;
+
+    for (int l = max(0, linha - 3); l <= min(6 - 1, linha + 3); l++) {
+        for (int c = max(0, coluna - 3); c <= min(6 - 1, coluna + 3); c++) {
+            int distancia = abs(linha - l) + abs(coluna - c);
+            if (distancia <= 3 && !matriz_acessada[l][c]) {
+                if (distancia <= 2) {
+                    if (matriz_oculta[l][c] == "🧨") {
+                        encontrou_armadilha = true;
+                    }
+                    if (matriz_oculta[l][c] == "💰") {
+                        encontrou_dica = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if (encontrou_armadilha) {
+        cout << "Há uma armadilha nas proximidades!" << endl;
+    } else if (encontrou_dica) {
+        cout << "Há um saco de diamantes nas proximidades!" << endl;
+    } else {
+        cout << "Nada encontrado nas proximidades!" << endl;
+    }
+}
+
+
 int main() {
     system("chcp 65001 > nul");
     int escolhas[4]; // Corrigido para 4 jogadores
@@ -75,6 +105,7 @@ int main() {
     string emoji_armadilha = {"🧨"};
     string emoji_dica = {"💰"};
     string emoji_1lugar = {"🏅"};
+    string emoji_vilao = "👹"; // Emoji do vilão
     bool matriz_acessada[6][6] = {false};
     int personagens_selecionados[4] = {0};
 
@@ -116,6 +147,7 @@ int main() {
     int totalarmadilhas = armadilhas * totalpontos;
     int totalpistas = dicas * totalpontos;
     int l, c;
+    int num_vilao = 0;
 
     // Inicializar a matriz com emojis de diamante
     for (l = 0; l < 6; l++) {
@@ -128,83 +160,112 @@ int main() {
     // Adicionar armadilhas e dicas à matriz oculta
     int num_armadilhas = 0, num_dicas = 0;
 
-    while (num_armadilhas < totalarmadilhas || num_dicas < totalpistas) {
-        l = rand() % 6;
-        c = rand() % 6;
-        if (matriz_oculta[l][c] == emoji_matriz) {
-            if (num_armadilhas < totalarmadilhas && (rand() % (totalarmadilhas + totalpistas)) < totalarmadilhas) {
-                matriz_oculta[l][c] = emoji_armadilha; // Adiciona uma bomba na matriz oculta
-                num_armadilhas++;
-            } else if (num_dicas < totalpistas) {
-                matriz_oculta[l][c] = emoji_dica; // Adiciona uma dica na matriz oculta
-                num_dicas++;
-            }
+    while (num_armadilhas < totalarmadilhas || num_dicas < totalpistas || num_vilao < 1) {
+    int l = rand() % 6;
+    int c = rand() % 6;
+    if (matriz_oculta[l][c] == emoji_matriz) {
+        if (num_armadilhas < totalarmadilhas && (rand() % (totalarmadilhas + totalpistas + 1)) < totalarmadilhas) {
+            matriz_oculta[l][c] = emoji_armadilha; // Adiciona uma bomba na matriz oculta
+            num_armadilhas++;
+        } else if (num_dicas < totalpistas && (rand() % (totalarmadilhas + totalpistas + 1)) >= totalarmadilhas) {
+            matriz_oculta[l][c] = emoji_dica; // Adiciona uma dica na matriz oculta
+            num_dicas++;
+        } else if (num_vilao < 1) {
+            matriz_oculta[l][c] = emoji_vilao; // Adiciona o vilão na matriz oculta
+            matriz[l][c] = emoji_vilao; // Vilão visível na matriz desde o início
+            num_vilao++;
         }
     }
+}
 
     int pontuacao[4] = {0};
     int jogadas = 0; // Contador de jogadas válidas
 
-    while (jogadas < totaljogadas) {
-        int jogadoratual = jogadas % num_jog;
-        cout << "Rodada: " << jogadas << " " << "Jogador: " << perso5[jogadoratual] << endl;
-        imprimirmatriz(matriz);
-        exibirranking(pontuacao, perso5, num_jog);
-        cout << "Vamos jogar! Escolha uma opção: " << endl << "1. Jogar" << endl << "2. Usar drone" << endl << "3. Usar Radar" << endl;
-        int escolha;
-        cin >> escolha;
-        if (escolha == 1) {
-            cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha coluna): " << ANSI_COLOR_RESET;
-            int linha, coluna;
-            cin >> linha >> coluna;
+while (jogadas < totaljogadas) {
+    int jogadoratual = jogadas % num_jog;
+    cout << "Rodada: " << jogadas << " " << "Jogador: " << perso5[jogadoratual] << endl;
+    imprimirmatriz(matriz);
+    exibirranking(pontuacao, perso5, num_jog);
+    cout << "Vamos jogar! Escolha uma opção: " << endl << "1. Jogar" << endl << "2. Usar drone" << endl << "3. Usar Radar" << endl << "4. Usar Dica" << endl;
+    int escolha;
+    cin >> escolha;
+    if (escolha == 1) {
+        cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha coluna): " << ANSI_COLOR_RESET;
+        int linha, coluna;
+        cin >> linha >> coluna;
 
-            if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-                if (matriz_acessada[linha][coluna]) {
-                    cout << ANSI_COLOR_RED << "Essa posição já foi acessada. Escolha outra posição." << ANSI_COLOR_RESET << endl;
-                    continue; // Voltar a jogada para o mesmo jogador
+        if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
+            if (matriz_acessada[linha][coluna]) {
+                cout << ANSI_COLOR_RED << "Essa posição já foi acessada. Escolha outra posição." << ANSI_COLOR_RESET << endl;
+                continue; // Voltar a jogada para o mesmo jogador
+            }
+            string conteudo = matriz_oculta[linha][coluna];
+            if (conteudo == emoji_armadilha) {
+                pontuacao[jogadoratual] -= 10;
+                cout << ANSI_COLOR_RED << "O jogador " << jogadoratual + 1 << " caiu em uma bomba e perdeu 10 quilates!" << ANSI_COLOR_RESET << endl;
+                matriz[linha][coluna] = emoji_armadilha; // Mostrar bomba após acesso
+            } else if (conteudo == emoji_dica) {
+                pontuacao[jogadoratual] += 10;
+                cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou um saco cheio de diamantes! Mais 10 quilates pra conta." << ANSI_COLOR_RESET << endl;
+                matriz[linha][coluna] = emoji_dica; // Mostrar dica após acesso
+            } else if (conteudo == emoji_matriz) {
+                int diamantes = rand() % 10 + 1;
+                pontuacao[jogadoratual] += diamantes;
+                cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou " << diamantes << " quilates de diamantes!" << ANSI_COLOR_RESET << endl;
+                matriz[linha][coluna] = emoji[escolhas[jogadoratual] - 1]; // Mostrar personagem após acesso
+            } else if (conteudo == emoji_vilao) {
+                int quilates_vilao = rand() % 100 + 1; // Quilates do vilão
+                int ataque_jogador = pontuacao[jogadoratual];
+                if (ataque_jogador >= quilates_vilao) {
+                    pontuacao[jogadoratual] += quilates_vilao;
+                    cout << ANSI_COLOR_YEL << "Parabéns! Você derrotou o vilão e ganhou" << quilates_vilao << " quilates do vilao!" << ANSI_COLOR_RESET << endl;
+                } else {
+                    pontuacao[jogadoratual] -= quilates_vilao;
+                    cout << ANSI_COLOR_RED << "Você perdeu para o vilão e o vilao roubou " << quilates_vilao << " quilates seu!" << ANSI_COLOR_RESET << endl;
                 }
-                string conteudo = matriz_oculta[linha][coluna];
-                if (conteudo == emoji_armadilha) {
-                    pontuacao[jogadoratual] -= 10;
-                    cout << ANSI_COLOR_RED << "O jogador " << jogadoratual + 1 << " caiu em uma bomba e perdeu 10 quilates!" << ANSI_COLOR_RESET << endl;
-                    matriz[linha][coluna] = emoji_armadilha; // Mostrar bomba após acesso
-                } else if (conteudo == emoji_dica) {
-                    pontuacao[jogadoratual] += 10;
-                    cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou um saco cheio de diamantes! Mais 10 quilates pra conta." << ANSI_COLOR_RESET << endl;
-                    matriz[linha][coluna] = emoji_dica; // Mostrar dica após acesso
-                } else if (conteudo == emoji_matriz) {
-                    int diamantes = rand() % 10 + 1;
-                    pontuacao[jogadoratual] += diamantes;
-                    cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou " << diamantes << " quilates de diamantes!" << ANSI_COLOR_RESET << endl;
-                    matriz[linha][coluna] = emoji[escolhas[jogadoratual] - 1]; // Mostrar personagem após acesso
-                }
+                matriz[linha][coluna] = emoji[escolhas[jogadoratual]-1]; // Vilão permanece visível após o combate
                 matriz_acessada[linha][coluna] = true; // Marcar posição como acessada
                 jogadas++; // Incrementar apenas se o jogador realmente jogou
-            } else {
-                cout << ANSI_COLOR_RED << "Posição inválida! Tente novamente." << ANSI_COLOR_RESET << endl;
             }
-        } else if (escolha == 2) {
-            cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha e coluna): " << ANSI_COLOR_RESET;
-            int linha, coluna;
-            cin >> linha >> coluna;
-            if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-                drone(matriz, matriz_oculta, linha, coluna);
-            } else {
-                cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
-                continue;
-            }
-        } else if (escolha == 3) {
-            cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha e coluna): " << ANSI_COLOR_RESET;
-            int linha, coluna;
-            cin >> linha >> coluna;
-            if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-                radardemina(matriz, matriz_oculta, matriz_acessada, linha, coluna, pontuacao[jogadoratual]);
-            } else {
-                cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
-                continue;
-            }
+            matriz_acessada[linha][coluna] = true; // Marcar posição como acessada
+            jogadas++; // Incrementar apenas se o jogador realmente jogou
+        } else {
+            cout << ANSI_COLOR_RED << "Posição inválida! Tente novamente." << ANSI_COLOR_RESET << endl;
+        }
+    } else if (escolha == 2) {
+        cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha e coluna): " << ANSI_COLOR_RESET;
+        int linha, coluna;
+        cin >> linha >> coluna;
+        if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
+            drone(matriz, matriz_oculta, linha, coluna);
+        } else {
+            cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
+            continue;
+        }
+    } else if (escolha == 3) {
+        cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha e coluna): " << ANSI_COLOR_RESET;
+        int linha, coluna;
+        cin >> linha >> coluna;
+        if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
+            radardemina(matriz, matriz_oculta, matriz_acessada, linha, coluna, pontuacao[jogadoratual]);
+        } else {
+            cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
+            continue;
+        }
+    } else if (escolha == 4) {
+        cout << ANSI_COLOR_CYN << "Jogador " << jogadoratual + 1 << " (" << perso5[jogadoratual] << ") Escolha uma posição (linha e coluna): " << ANSI_COLOR_RESET;
+        int linha, coluna;
+        cin >> linha >> coluna;
+        if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
+            dica(matriz_oculta, matriz_acessada, linha, coluna);
+        } else {
+            cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
+            continue;
         }
     }
+}
+
+
 
     cout << ANSI_COLOR_YEL << "O ranking final é: " << ANSI_COLOR_RESET << endl;
     int maior = 0, pma = 0;
