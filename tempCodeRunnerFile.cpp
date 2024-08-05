@@ -92,20 +92,20 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
 
 int main() {
     system("chcp 65001 > nul");
-    int escolhas[4]; // Corrigido para 4 jogadores
+    int escolhas[4]; // pra armazenar os personagem escolhidos
     int i;
     float armadilhas = 0.10;
     float dicas = 0.05;
     int num_jog, escolha, totaljogadas = 36;
-    string perso5[4]; // Corrigido para 4 jogadores
+    string perso5[4]; // pra armazenar o nome dos jogadores
     string emoji[] = {"🐻", "😽", "🧙‍♂", "🦸‍♂"};
     string emoji_matriz = {"💎"};
     string matriz[6][6];
-    string matriz_oculta[6][6]; // Matriz oculta para armadilhas e dicas
+    string matriz_oculta[6][6];
     string emoji_armadilha = {"🧨"};
     string emoji_dica = {"💰"};
     string emoji_1lugar = {"🏅"};
-    string emoji_vilao = "👹"; // Emoji do vilão
+    string emoji_vilao = "👹";
     bool matriz_acessada[6][6] = {false};
     int personagens_selecionados[4] = {0};
 
@@ -149,15 +149,15 @@ int main() {
     int l, c;
     int num_vilao = 0;
 
-    // Inicializar a matriz com emojis de diamante
+    // aqui vai inicializar a matriz principal e a matriz oculta toda com diamante
     for (l = 0; l < 6; l++) {
         for (c = 0; c < 6; c++) {
             matriz[l][c] = emoji_matriz;
-            matriz_oculta[l][c] = emoji_matriz; // Inicializar matriz oculta com diamantes
+            matriz_oculta[l][c] = emoji_matriz;
         }
     }
 
-    // Adicionar armadilhas e dicas à matriz oculta
+    // aqui vai adicionar os emoji de armadilha e saco de dinheiro só na matriz oculta
     int num_armadilhas = 0, num_dicas = 0;
 
     while (num_armadilhas < totalarmadilhas || num_dicas < totalpistas || num_vilao < 1) {
@@ -165,21 +165,21 @@ int main() {
     int c = rand() % 6;
     if (matriz_oculta[l][c] == emoji_matriz) {
         if (num_armadilhas < totalarmadilhas && (rand() % (totalarmadilhas + totalpistas + 1)) < totalarmadilhas) {
-            matriz_oculta[l][c] = emoji_armadilha; // Adiciona uma bomba na matriz oculta
+            matriz_oculta[l][c] = emoji_armadilha; 
             num_armadilhas++;
         } else if (num_dicas < totalpistas && (rand() % (totalarmadilhas + totalpistas + 1)) >= totalarmadilhas) {
-            matriz_oculta[l][c] = emoji_dica; // Adiciona uma dica na matriz oculta
+            matriz_oculta[l][c] = emoji_dica; 
             num_dicas++;
         } else if (num_vilao < 1) {
-            matriz_oculta[l][c] = emoji_vilao; // Adiciona o vilão na matriz oculta
-            matriz[l][c] = emoji_vilao; // Vilão visível na matriz desde o início
+            matriz_oculta[l][c] = emoji_vilao; 
+            matriz[l][c] = emoji_vilao; 
             num_vilao++;
         }
     }
 }
 
     int pontuacao[4] = {0};
-    int jogadas = 0; // Contador de jogadas válidas
+    int jogadas = 0; // aqui conta so as rodadas validas!!!
 
 while (jogadas < totaljogadas) {
     int jogadoratual = jogadas % num_jog;
@@ -197,13 +197,13 @@ while (jogadas < totaljogadas) {
         if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
             if (matriz_acessada[linha][coluna]) {
                 cout << ANSI_COLOR_RED << "Essa posição já foi acessada. Escolha outra posição." << ANSI_COLOR_RESET << endl;
-                continue; // Voltar a jogada para o mesmo jogador
+                continue; // aqui nao passa a rodada nem o player!!!
             }
             string conteudo = matriz_oculta[linha][coluna];
             if (conteudo == emoji_armadilha) {
                 pontuacao[jogadoratual] -= 10;
                 cout << ANSI_COLOR_RED << "O jogador " << jogadoratual + 1 << " caiu em uma bomba e perdeu 10 quilates!" << ANSI_COLOR_RESET << endl;
-                matriz[linha][coluna] = emoji_armadilha; // Mostrar bomba após acesso
+                matriz[linha][coluna] = emoji_armadilha; // aqui serve pra mostrar os emoji da matriz oculta na matriz principal!!!
             } else if (conteudo == emoji_dica) {
                 pontuacao[jogadoratual] += 10;
                 cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou um saco cheio de diamantes! Mais 10 quilates pra conta." << ANSI_COLOR_RESET << endl;
@@ -212,9 +212,9 @@ while (jogadas < totaljogadas) {
                 int diamantes = rand() % 10 + 1;
                 pontuacao[jogadoratual] += diamantes;
                 cout << ANSI_COLOR_YEL << "O jogador " << jogadoratual + 1 << " encontrou " << diamantes << " quilates de diamantes!" << ANSI_COLOR_RESET << endl;
-                matriz[linha][coluna] = emoji[escolhas[jogadoratual] - 1]; // Mostrar personagem após acesso
+                matriz[linha][coluna] = emoji[escolhas[jogadoratual] - 1]; 
             } else if (conteudo == emoji_vilao) {
-                int quilates_vilao = rand() % 100 + 1; // Quilates do vilão
+                int quilates_vilao = rand() % 100 + 1; 
                 int ataque_jogador = pontuacao[jogadoratual];
                 if (ataque_jogador >= quilates_vilao) {
                     pontuacao[jogadoratual] += quilates_vilao;
@@ -223,12 +223,12 @@ while (jogadas < totaljogadas) {
                     pontuacao[jogadoratual] -= quilates_vilao;
                     cout << ANSI_COLOR_RED << "Você perdeu para o vilão e o vilao roubou " << quilates_vilao << " quilates seu!" << ANSI_COLOR_RESET << endl;
                 }
-                matriz[linha][coluna] = emoji[escolhas[jogadoratual]-1]; // Vilão permanece visível após o combate
-                matriz_acessada[linha][coluna] = true; // Marcar posição como acessada
-                jogadas++; // Incrementar apenas se o jogador realmente jogou
+                matriz[linha][coluna] = emoji[escolhas[jogadoratual]-1]; 
+                matriz_acessada[linha][coluna] = true; // marca as posições acessadas
+                jogadas++; 
             }
-            matriz_acessada[linha][coluna] = true; // Marcar posição como acessada
-            jogadas++; // Incrementar apenas se o jogador realmente jogou
+            matriz_acessada[linha][coluna] = true; 
+            jogadas++; 
         } else {
             cout << ANSI_COLOR_RED << "Posição inválida! Tente novamente." << ANSI_COLOR_RESET << endl;
         }
