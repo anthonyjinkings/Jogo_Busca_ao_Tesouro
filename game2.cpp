@@ -15,6 +15,8 @@
 using namespace std;
 
 bool usou_drone[4] = {false}; //aqui determina se o jogador usou ou não o drone.
+bool usou_radar[4] = {false};
+bool usou_dica[4] = {false};
 
 void imprimirmatriz(const string matriz[6][6]) { //imprime a matriz a cada rodada.
     cout << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
@@ -53,14 +55,12 @@ void drone(string matriz[6][6], const string matriz_oculta[6][6], int linha, int
 void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna, int& pontos, int jogadoratual) {
     int radar_revelado = 0; //para limitar o número de posições reveladas.
     bool encontroudinamite = false; //bool usado para determinar se encontrou dinamite ou não.
-    bool usou_radar[4] = {false}; //para limitar se o jogador já usou radar ou não.
 
     if (usou_radar[jogadoratual]) {
         cout << "Você já usou o Radar de mina!" << endl;
         return;
-    } 
-
-    for (int l = max(0, linha - 1); l <= min(6 - 1, linha + 1) && radar_revelado < 1; l++) {
+    } else {
+            for (int l = max(0, linha - 1); l <= min(6 - 1, linha + 1) && radar_revelado < 1; l++) {
         for (int c = max(0, coluna - 1); c <= min(6 - 1, coluna + 1) && radar_revelado < 1; c++) {
             if (!matriz_acessada[l][c] && matriz_oculta[l][c] == "🧨") { //determina que, se tal posição já não foi acessada e se a matriz oculta
             //tem um dinamite, vai mudar o bool pra true nos 3 bool.
@@ -69,6 +69,7 @@ void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool mat
                 usou_radar[jogadoratual] = true;
             }
             matriz[l][c] = matriz_oculta[l][c]; //muda o emoji da visivel pro emoji que está na oculta.
+            usou_radar[jogadoratual] = true;
         }
     }
 
@@ -79,13 +80,19 @@ void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool mat
         pontos -= 15;
         cout << ANSI_COLOR_YEL << "Que azar! Nenhum dinamite por aqui, por causa disso menos 15 quilates na conta." << ANSI_COLOR_RESET << endl;
     }
+    }
+
 }
 
 
-void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna) { //diz se tem armadilhas, diamantes ou bonus proximos
+void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna, int jogadoratual) { //diz se tem armadilhas, diamantes ou bonus proximos
     bool encontrou_armadilha = false;
     bool encontrou_dica = false;
-    for (int l = max(0, linha - 3); l <= min(6 - 1, linha + 3); l++) { //delimita acessar no minimo posição 0 e no máximo posição 5 de até 3 células próximas do que selecionou.
+    if (usou_dica[jogadoratual]) {
+        cout << "Você já usou dica! Tente novamente." << endl;
+        return;
+    } else {
+            for (int l = max(0, linha - 3); l <= min(6 - 1, linha + 3); l++) { //delimita acessar no minimo posição 0 e no máximo posição 5 de até 3 células próximas do que selecionou.
         for (int c = max(0, coluna - 3); c <= min(6 - 1, coluna + 3); c++) {
             int distancia = (linha - l) + (coluna - c); //determina o número absoluto
             if (distancia <= 3 && !matriz_acessada[l][c]) { //verifica se a distancia é menor ou igual a 3 e se já não foi acessada.
@@ -98,6 +105,7 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
                     }
                 }
             }
+            usou_dica[jogadoratual] = true;
         }
     }
 
@@ -107,6 +115,7 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
         cout << "Há um saco de diamantes nas proximidades!" << endl;
     } else {
         cout << "Nada encontrado nas proximidades!" << endl;
+    }
     }
 }
 
@@ -251,7 +260,7 @@ while (jogadas < totaljogadas) {
                 cout << "Nada encontrado!" << endl;
             }
              else if (conteudo == emoji_vilao) {
-                int quilates_vilao = rand() % 100 + 1; 
+                int quilates_vilao = rand() % 25 + 1; 
                 int ataque_jogador = pontuacao[jogadoratual];
                 if (ataque_jogador >= quilates_vilao) {
                     pontuacao[jogadoratual] += quilates_vilao;
@@ -294,7 +303,7 @@ while (jogadas < totaljogadas) {
         int linha, coluna;
         cin >> linha >> coluna;
         if (linha >= 0 && linha < 6 && coluna >= 0 && coluna < 6) {
-            dica(matriz_oculta, matriz_acessada, linha, coluna);
+            dica(matriz_oculta, matriz_acessada, linha, coluna, jogadoratual);
         } else {
             cout << ANSI_COLOR_RED << "Posição inválida. Tente novamente." << ANSI_COLOR_RESET << endl;
             continue;
