@@ -3,10 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <stdlib.h>
-#include <conio.h>
 #include <windows.h>
-#include <locale>
-#include <codecvt>
 #define ANSI_COLOR_CYN      "\e[0;36m" // Cor ciano
 #define ANSI_COLOR_RED      "\e[0;31m" // Cor vermelha
 #define ANSI_COLOR_YEL      "\e[0;33m" // Cor amarela
@@ -17,17 +14,38 @@ using namespace std;
 bool usou_drone[4] = {false}; //aqui determina se o jogador usou ou não o drone.
 bool usou_radar[4] = {false};
 bool usou_dica[4] = {false};
+//const não permite modificações na variável ao decorrer do código.
 
-void imprimirmatriz(const string matriz[6][6]) { //imprime a matriz a cada rodada.
-    cout << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
+void imprimirmatriz(const string matriz[6][6], const int pontuacao[], const string nomes[], int num_jog) { //aqui vai imprimir a matriz com laterais e imprimir o ranking ao lado da matriz.
+    // Imprime a matriz
+    cout << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << "               " << ANSI_COLOR_CYN << "Ranking" << ANSI_COLOR_RESET << endl;
     for (int l = 0; l < 6; l++) {
         cout << ANSI_COLOR_CYN << "| " << ANSI_COLOR_RESET;
         for (int c = 0; c < 6; c++) {
             cout << setw(3) << matriz[l][c] << ANSI_COLOR_CYN << " | " << ANSI_COLOR_RESET;
         }
-        cout << endl << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << endl;
+        cout << "              "; // Espaço para o ranking
+        // Imprime o ranking ao lado da matriz
+        for (int i = 0; i < num_jog; i++) {
+            if (i == l) {
+                cout << ANSI_COLOR_RED << "Jogador " << i + 1 << ": " << pontuacao[i] << " quilates" << ANSI_COLOR_RESET << "            ";
+            } else {
+                cout << "                    ";
+            }
+        }
+        cout << endl << ANSI_COLOR_CYN << "+-----+-----+-----+-----+-----+" << ANSI_COLOR_RESET << "            " << ANSI_COLOR_RESET;
+        for (int i = 0; i < num_jog; i++) {
+            if (l == i) {
+                cout << "----------";
+            } else {
+                cout << "                    ";
+            }
+        }
+        cout << endl;
     }
+
 }
+
 
 void exibirranking(const int pontuacao[], const string nomes[], int num_jog) { //aqui imprime o ranking a cada rodada.
     cout << ANSI_COLOR_CYN << "Ranking atual:" << ANSI_COLOR_RESET << endl;
@@ -44,7 +62,7 @@ void drone(string matriz[6][6], const string matriz_oculta[6][6], int linha, int
     } else {
         for (int l = max(0, linha - 1); l <= min(6 - 1, linha + 1) && dronerevelado < 1; l++) { //o max serve para limitar que o acesso
         //seja no minimo 0 e o min determina que 6-1, ou seja, que acesse no maximo a posição 5 da matriz.
-        for (int c = max(0, coluna - 1); c <= min(6 - 1, coluna + 1) && dronerevelado < 1; l++) {
+        for (int c = max(0, coluna - 1); c <= min(6 - 1, coluna + 1) && dronerevelado < 1; l++) { // define que linha e coluna nunca serão menores que 0 e maiores que 5.
             matriz[l][c] = matriz_oculta[l][c]; //aqui é pra mostrar os emoji da oculta na matriz visível.
             dronerevelado++; //continuação da limitação.
             usou_drone[jogadoratual] = true; //coloca true depois do uso.
@@ -52,7 +70,7 @@ void drone(string matriz[6][6], const string matriz_oculta[6][6], int linha, int
     }
 }
     } //o radar de mina é para determinar se há dinamite proxima da posição que voce selecionou, se tiver ganha 15 quilates, se não, perde 15.
-void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna, int& pontos, int jogadoratual) {
+void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna, int& pontos, int jogadoratual) { //int& permite modificar a variável diretamente.
     int radar_revelado = 0; //para limitar o número de posições reveladas.
     bool encontroudinamite = false; //bool usado para determinar se encontrou dinamite ou não.
 
@@ -84,7 +102,7 @@ void radardemina(string matriz[6][6], const string matriz_oculta[6][6], bool mat
 
 }
 
-
+//a função dica diz se tem armadilhas, diamantes ou bonus proximos da posição selecionada.
 void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linha, int coluna, int jogadoratual) { //diz se tem armadilhas, diamantes ou bonus proximos
     bool encontrou_armadilha = false;
     bool encontrou_dica = false;
@@ -94,7 +112,7 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
     } else {
             for (int l = max(0, linha - 3); l <= min(6 - 1, linha + 3); l++) { //delimita acessar no minimo posição 0 e no máximo posição 5 de até 3 células próximas do que selecionou.
         for (int c = max(0, coluna - 3); c <= min(6 - 1, coluna + 3); c++) {
-            int distancia = (linha - l) + (coluna - c); //determina o número absoluto
+            int distancia = (linha - l) + (coluna - c); //faz o calculo da distancia entre dois pontos, tornando em numero absoluto para ter sempre um resultado positivo.
             if (distancia <= 3 && !matriz_acessada[l][c]) { //verifica se a distancia é menor ou igual a 3 e se já não foi acessada.
                 if (distancia <= 2) {
                     if (matriz_oculta[l][c] == "🧨") {
@@ -175,8 +193,14 @@ int main() {
     }
 
     //--------------------------------Parte dois adicional----------------------------------------//
+    cout << ANSI_COLOR_YEL << "Bem-vindos ao caça tesouro perdido!" << endl << "Me chamo pirata Anthony e estou aqui para te ensinar como pode me ajudar nessa caça!" << endl;
+    cout << "Como pode ver temos muitos lugares para explorar, e temos muitas chances de encontrar muitos diamantes por essas terras, mas cuidado! Foi assim que me aposentei nessa caça ao tesouro..." << endl;
+    cout << "Eu estava caçando e estava ficando rico com todos os diamantes que eu achava até que... me deparei com um homem que usava uma máscara e fazia propostas tentadoras... E uma delas era uma aposta, se ele vencesse uma batalha ele levava meus quilates, mas se eu ganhasse eu levava todos os seus quilates..." << endl;
+    cout << "E isso me custou todos os meus quilates! E agora estou velho demais para essa aventura... Mas um jovem como você pode derrotá-lo!" << endl;
+    cout << "Cuidado por onde anda, você só pode usar dicas, rada e drone uma vez, use com sabedoria, além disso, tem armadilhas espalhadas por toda a área, mas claro, tem um bonus sensacional por aí que nunca encontrei." << endl;
+    cout << "É isso... Não perca tempo e me traga esse tesouro!" << ANSI_COLOR_RESET << endl;
     srand(time(NULL));
-    int totalpontos = 6 * 6;
+    int totalpontos = 36;
     int totalarmadilhas = armadilhas * totalpontos;
     int totalpistas = dicas * totalpontos;
     int l, c;
@@ -191,7 +215,7 @@ int main() {
             matriz_oculta[l][c] = emoji_matriz;
         }
     }
-    for (i = 0; i < total_diamantes; i++) { //aqui vai inicializar com diamantes em 40% da matriz.
+    for (i = 0; i < total_diamantes; i++) { //aqui vai inicializar com diamantes em 50% da matriz.
         do {
             l = rand() % 6;
             c = rand() % 6;
@@ -203,13 +227,13 @@ int main() {
     int num_armadilhas = 0, num_dicas = 0;
 
     while (num_armadilhas < totalarmadilhas || num_dicas < totalpistas || num_vilao < 1) {
-    int l = rand() % 6;
+    int l = rand() % 6; // escolhe 1 das 6 posições aleatoriamente para adicionar os emojis.
     int c = rand() % 6;
-    if (matriz_oculta[l][c] == emoji_matriz) {
-        if (num_armadilhas < totalarmadilhas && (rand() % (totalarmadilhas + totalpistas + 1)) < totalarmadilhas) {
+    if (matriz_oculta[l][c] == emoji_matriz) { //verifica se tal posição da matriz oculta está liberada.
+        if (num_armadilhas < totalarmadilhas) {
             matriz_oculta[l][c] = emoji_armadilha; 
             num_armadilhas++;
-        } else if (num_dicas < totalpistas && (rand() % (totalarmadilhas + totalpistas + 1)) >= totalarmadilhas) {
+        } else if (num_dicas < totalpistas && num_armadilhas >= totalarmadilhas) {
             matriz_oculta[l][c] = emoji_dica; 
             num_dicas++;
         } else if (num_vilao < 1) {
@@ -224,10 +248,10 @@ int main() {
     int jogadas = 0; // aqui conta so as rodadas validas!!!
 
 while (jogadas < totaljogadas) {
-    int jogadoratual = jogadas % num_jog;
+    int jogadoratual = jogadas % num_jog; //aqui faz o calculo do resto, exemplo: 36 jogadas % 2 jogadores, jogada 0 % 2 = jogador 0 (jogador 1), jogada 1 % 2 = jogador 1(jogador 2).
     cout << "Rodada: " << jogadas << " " << "Jogador: " << perso5[jogadoratual] << endl;
-    imprimirmatriz(matriz);
-    exibirranking(pontuacao, perso5, num_jog);
+    // Dentro do loop principal
+    imprimirmatriz(matriz, pontuacao, perso5, num_jog);
     cout << "Vamos jogar! Escolha uma opção: " << endl << "1. Jogar" << endl << "2. Usar drone" << endl << "3. Usar Radar" << endl << "4. Usar Dica" << endl;
     int escolha;
     cin >> escolha;
