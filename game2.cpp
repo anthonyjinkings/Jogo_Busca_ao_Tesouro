@@ -114,7 +114,6 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
         for (int c = max(0, coluna - 3); c <= min(6 - 1, coluna + 3); c++) {
             int distancia = (linha - l) + (coluna - c); //faz o calculo da distancia entre dois pontos, tornando em numero absoluto para ter sempre um resultado positivo.
             if (distancia <= 3 && !matriz_acessada[l][c]) { //verifica se a distancia é menor ou igual a 3 e se já não foi acessada.
-                if (distancia <= 2) {
                     if (matriz_oculta[l][c] == "🧨") {
                         encontrou_armadilha = true;
                     }
@@ -135,7 +134,6 @@ void dica(const string matriz_oculta[6][6], bool matriz_acessada[6][6], int linh
         cout << "Nada encontrado nas proximidades!" << endl;
     }
     }
-}
 
 
 int main() {
