@@ -146,7 +146,7 @@ int main() {
     float dicas = 0.05;
     int num_jog, escolha, totaljogadas = 36;
     string perso5[4]; // pra armazenar o nome dos jogadores
-    string emoji[] = {"🐻", "😽", "🧙‍♂", "🦸‍♂"};
+    string emoji[] = {"🐻", "😽", "🐸", "🐢"};
     string emoji_matriz = {"🗺️"};
     string matriz[6][6];
     string matriz_oculta[6][6];
@@ -170,7 +170,7 @@ int main() {
         getline(cin, perso5[i]);
     }
     cout << "Agora escolha seu personagem: " << endl;
-    cout << "Urso" << emoji[0] << "  " << "Gato" << emoji[1] << "  " << "Mago" << emoji[2] << "  " << "Super-Herói" << emoji[3] << endl;
+    cout << "Urso" << emoji[0] << "  " << "Gato" << emoji[1] << "  " << "Sapo" << emoji[2] << "  " << "Tartaruga" << emoji[3] << endl;
     for (i = 0; i < num_jog; i++) {
         cout << "Personagem do jogador " << i + 1 << endl;
         cin >> escolha;
